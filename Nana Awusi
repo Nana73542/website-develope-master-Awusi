@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Submission Platform</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+    /* Base Styles */
+    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f2f5; color:#333; transition:background 0.3s, color 0.3s;}
+    body.dark-mode { background:#121212; color:#eee;}
+    header { background:#4CAF50; color:white; padding:20px 10px; text-align:center; font-size:24px; font-weight:bold; transition:background 0.3s;}
+    header.dark-mode { background:#1e7e34;}
+    header .header-content { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;}
+    header .header-content img { width:50px; height:50px; border-radius:8px; animation:logoBounce 2s infinite;}
+    @keyframes logoBounce {0%,100%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-5px) rotate(15deg);}}
+    main { max-width:800px; margin:30px auto; padding:25px; background:white; border-radius:12px; box-shadow:0 6px 15px rgba(0,0,0,0.1); transition:background 0.3s;}
+    main.dark-mode { background:#1f1f1f;}
+    h2 { color:#4CAF50; margin-bottom:15px; text-align:center;}
+    h2.dark-mode { color:#90ee90;}
+    .payment-info { font-size:18px; background:#e8f5e9; padding:20px; border-radius:12px; margin:20px 0; text-align:center; border:2px solid #4CAF50; animation:pulse 2s infinite;}
+    .payment-info.dark-mode { background:#263238; border-color:#90ee90; color:#eee;}
+    .payment-info small { display:block; margin-top:10px; font-size:14px; color:#2e7d32;}
+    @keyframes pulse {0%{box-shadow:0 0 0 0 rgba(76,175,80,0.4);} 70%{box-shadow:0 0 0 10px rgba(76,175,80,0);} 100%{box-shadow:0 0 0 0 rgba(76,175,80,0);}}
+    form { margin-top:25px; display:flex; flex-direction:column; gap:15px;}
+    label { font-weight:bold; margin-bottom:5px;}
+    input, textarea { width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; transition:0.3s; background:white; color:#333;}
+    input.dark-mode, textarea.dark-mode { background:#2b2b2b; color:#eee; border-color:#555;}
+    input:focus, textarea:focus { border-color:#4CAF50; outline:none; box-shadow:0 0 5px rgba(76,175,80,0.3);}
+    input[type="submit"] { background:#4CAF50; color:white; border:none; cursor:pointer; font-size:18px; padding:12px 0; border-radius:8px; transition:background-color 0.3s, transform 0.2s;}
+    input[type="submit"]:hover { background:#45a049; transform:translateY(-2px);}
+    .upload-btn-wrapper { position:relative; display:flex; justify-content:center; margin:20px 0; flex-wrap:wrap; }
+    .btn-upload { font-size:50px; color:#4CAF50; border:3px dashed #4CAF50; border-radius:50%; width:140px; height:140px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s ease; position:relative; animation:bounce 2s infinite; text-align:center;}
+    .btn-upload.dark-mode { border-color:#90ee90; color:#90ee90; }
+    .btn-upload::after { content:"Click or Drag files"; position:absolute; bottom:-30px; font-size:14px; color:#4CAF50; width:150px; text-align:center; left:50%; transform:translateX(-50%);}
+    .btn-upload.dark-mode::after { color:#90ee90;}
+    @keyframes bounce {0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+    .btn-upload:hover { background:#e8f5e9; transform:scale(1.05);}
+    .btn-upload.dark-mode:hover { background:#1f2a2a;}
+    input[type=file] { position:absolute; left:0; top:0; opacity:0; width:100%; height:100%; cursor:pointer;}
+    #preview { margin-top:20px; max-width:100%; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.2); display:none; transition:opacity 0.3s;}
+    .contact-box { max-width:800px; margin:40px auto; padding:25px; background:#4CAF50; color:white; border-radius:12px; text-align:center; box-shadow:0 6px 15px rgba(0,0,0,0.1); font-size:16px;}
+    .contact-box.dark-mode { background:#1e7e34;}
+    .contact-box p { margin:8px 0;}
+    .success-msg { background:#4CAF50; color:white; padding:15px; border-radius:8px; text-align:center; margin-top:15px; font-weight:bold; display:none; animation:fadeIn 0.5s;}
+    .success-msg.dark-mode { background:#90ee90; color:#121212;}
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    .spinner { display:none; margin:auto; border:4px solid #f3f3f3; border-top:4px solid #4CAF50; border-radius:50%; width:30px; height:30px; animation:spin 1s linear infinite;}
+    .spinner.dark-mode { border-top:4px solid #90ee90;}
+    @keyframes spin { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
+    .dark-mode-toggle { position:fixed; top:15px; right:15px; padding:10px 15px; border:none; border-radius:5px; cursor:pointer; background:#007BFF; color:white; font-weight:bold; z-index:1000; transition:background 0.3s;}
+    .dark-mode-toggle:hover { background:#0056b3;}
+</style>
+</head>
+<body>
+
+<button class="dark-mode-toggle" id="darkModeToggle">🌙 Dark Mode</button>
+
+<header>
+    <div class="header-content">
+        <img src="file_00000000fc3862308ed0eeed25432e4f.png" alt="Logo" id="logo">
+        <span>Payment Submission Platform - NANA AWUSI ITECH</span>
+    </div>
+</header>
+
+<main>
+    <section id="payment">
+        <h2>Payment Details</h2>
+        <div class="payment-info">
+            <p>Send your payment of <strong>₵20</strong> via telephone to:</p>
+            <p><strong>+233535899238</strong></p>
+            <small>Powered by NANA AWUSI ITECH</small>
+        </div>
+        <p style="text-align:center;">After sending payment, take a screenshot and submit it using the form below or via this email to Nana Awusi.</p>
+    </section>
+
+    <section id="form">
+        <h2>Submit Payment Screenshot</h2>
+        <form id="paymentForm" action="https://formsubmit.co/awusiemmanuel604@gmail.com" method="POST" enctype="multipart/form-data" target="hidden_iframe">
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="hidden" name="_subject" value="New Payment Screenshot Submission" />
+            <input type="hidden" name="_autoresponse" value="Thank you for submitting your payment screenshot! We will review it shortly." />
+
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label>Payment Screenshot(s)</label>
+            <div class="upload-btn-wrapper" id="dropArea">
+                <div class="btn-upload" id="btnUpload">+</div>
+                <input type="file" id="screenshotInput" name="screenshot" accept="image/*" multiple required>
+            </div>
+            <div id="previewContainer"></div>
+
+            <label for="message">Additional Message</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+
+            <div class="spinner" id="spinner"></div>
+            <input type="submit" value="Submit">
+        </form>
+
+        <div class="success-msg" id="successMsg">🎉 Your payment screenshot has been submitted successfully!</div>
+    </section>
+</main>
+
+<div class="contact-box">
+   <p>Email: <a href="mailto:awusiemmanuel604@gmail.com" title="Send an email to awusiemmanuel604@gmail.com">awusiemmanuel604@gmail.com</a></p>
+   <p>WhatsApp: <a href="https://wa.me/233535899238" target="_blank"> 233535899238</a></p>
+    <p>Website created by NANA AWUSI ITECH. All rights reserved</p>
+    <p>Nana Awusi Web development © 2025</p>
+</div>
+
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
+<script>
+    // Dark mode toggle
+    const toggle = document.getElementById('darkModeToggle');
+    toggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        document.querySelector('main').classList.toggle('dark-mode');
+        document.querySelector('header').classList.toggle('dark-mode');
+        document.querySelectorAll('input, textarea').forEach(el=>el.classList.toggle('dark-mode'));
+        document.querySelectorAll('.btn-upload').forEach(el=>el.classList.toggle('dark-mode'));
+        document.querySelectorAll('.payment-info').forEach(el=>el.classList.toggle('dark-mode'));
+        document.querySelectorAll('.success-msg').forEach(el=>el.classList.toggle('dark-mode'));
+        document.querySelector('.contact-box').classList.toggle('dark-mode');
+    });
+
+    // Image preview + drag & drop
+    const dropArea = document.getElementById('dropArea');
+    const screenshotInput = document.getElementById('screenshotInput');
+    const previewContainer = document.getElementById('previewContainer');
+
+    function updatePreview(files){
+        previewContainer.innerHTML = '';
+        Array.from(files).forEach(file=>{
+            if(file.size > 5*1024*1024){ alert("File "+file.name+" is too big. Max 5MB."); return; }
+            if(!file.type.startsWith('image/')){ alert("File "+file.name+" is not an image."); return; }
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.maxWidth='150px';
+            img.style.margin='5px';
+            img.style.borderRadius='8px';
+            img.style.boxShadow='0 4px 10px rgba(0,0,0,0.2)';
+            previewContainer.appendChild(img);
+        });
+    }
+
+    screenshotInput.addEventListener('change', ()=>updatePreview(screenshotInput.files));
+    dropArea.addEventListener('dragover', e=>{ e.preventDefault(); dropArea.classList.add('hover'); });
+    dropArea.addEventListener('dragleave', e=>{ e.preventDefault(); dropArea.classList.remove('hover'); });
+    dropArea.addEventListener('drop', e=>{ 
+        e.preventDefault(); 
+        screenshotInput.files = e.dataTransfer.files;
+        updatePreview(screenshotInput.files);
+    });
+
+    // Form submission
+    const form = document.getElementById('paymentForm');
+    const successMsg = document.getElementById('successMsg');
+    const spinner = document.getElementById('spinner');
+
+    form.addEventListener('submit', function(){
+        spinner.style.display = 'block';
+        setTimeout(()=>{
+            spinner.style.display = 'none';
+            successMsg.style.display = 'block';
+            form.reset();
+            previewContainer.innerHTML='';
+            // Auto-hide success message
+            setTimeout(()=>successMsg.style.display='none',5000);
+        }, 800);
+    });
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Chat Button</title>
+  <style>
+    /* Floating WhatsApp button container */
+    #wa-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #25D366;
+      padding: 15px;
+      border-radius: 50px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+    }
+
+    #wa-container select,
+    #wa-container button {
+      border: none;
+      padding: 8px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    #wa-container button {
+      background-color: white;
+      color: #25D366;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #wa-container img {
+      width: 24px;
+    }
+  </style>
+</head>
+<a href="https://wa.me/233535899238" target="_blank" class="whatsapp-button">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+  Chat with "Nana Awusi"
+</a>
+
+<style>
+/* WhatsApp Button Styling */
+.whatsapp-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #25D366;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background-color 0.2s;
+  z-index: 1000;
+}
+
+.whatsapp-button img {
+  width: 24px;
+  margin-right: 10px;
+}
+
+/* Hover effect */
+.whatsapp-button:hover {
+  background-color: #128C7E;
+  transform: scale(1.05);
+}
+
+/* Responsive for small screens */
+@media (max-width: 500px) {
+  .whatsapp-button {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+  .whatsapp-button img {
+    width: 20px;
+    margin-right: 8px;
+  }
+}
+</style>
+<!-- Mobile Money Payment Section -->
+<div style="text-align: center; margin: 20px 0;">
+  <!-- Notice for users -->
+  <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
+    Scan the QR code below to pay via Mobile Money
+  </p>
+
+  <!-- QR Code Image -->
+  <img src="momoqr_2025-09-28T20-11-01-680Z.jpg.png" alt="Mobile Money QR Code" 
+       style="width: 200px; max-width: 80%; height: auto; border: 2px solid #26b90f; border-radius: 10px;">
+</div>
+<!-- Music Panel Button -->
+<div id="music-panel-button" 
+     style="position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+            background: linear-gradient(45deg, #1DB954, #1ed760);
+            color: white; padding: 12px 16px; 
+            border-radius: 8px 0 0 8px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000;
+            transition: transform 0.2s;">
+  🎶 Play music!
+</div>
+
+<!-- Hidden Music Panel -->
+<div id="music-panel" 
+     style="position: fixed; right: 0; top: 0; height: 100%; width: 0; 
+            background-color: #fff; overflow-x: hidden; transition: width 0.4s ease;
+            padding-top: 60px; box-shadow: -3px 0 15px rgba(0,0,0,0.3); z-index: 999;">
+
+  <!-- Close Button -->
+  <a href="javascript:void(0)" id="close-btn" 
+     style="position: absolute; top: 20px; left: 20px; font-size: 28px; text-decoration: none; color: #333; font-weight: bold;">&times;</a>
+  
+  <!-- Description -->
+  <div style="padding: 20px; text-align: center;">
+    <p style="font-size: 16px; color: #555; margin-bottom: 15px; font-style: italic;">
+      🎵 Play a song to enjoy the page!
+    </p>
+  </div>
+  
+  <!-- Song List -->
+  <div style="padding: 0 20px;">
+    <div class="song-item" data-src="two.mp3" style="display: flex; align-items: center; margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 10px; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <div style="width: 40px; height: 40px; background: #1DB954; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px;">▶</div>
+      <span>Song 1</span>
+    </div>
+
+    <div class="song-item" data-src="one.mp3" style="display: flex; align-items: center; margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 10px; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <div style="width: 40px; height: 40px; background: #1DB954; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px;">▶</div>
+      <span>Song 2</span>
+    </div>
+
+    <div class="song-item" data-src="toolate.mp3" style="display: flex; align-items: center; margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 10px; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <div style="width: 40px; height: 40px; background: #1DB954; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px;">▶</div>
+      <span>Song 3</span>
+    </div>
+
+    <div class="song-item" data-src="four.mp3" style="display: flex; align-items: center; margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 10px; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <div style="width: 40px; height: 40px; background: #1DB954; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px;">▶</div>
+      <span>Song 4</span>
+    </div>
+
+    <div class="song-item" data-src="five.mp3" style="display: flex; align-items: center; margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 10px; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <div style="width: 40px; height: 40px; background: #1DB954; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px;">▶</div>
+      <span>Song 5</span>
+    </div>
+
+    <!-- Audio Player -->
+    <audio id="audio-player" controls style="width: 100%; margin-top: 20px; border-radius: 10px;">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+</div>
+
+<script>
+  const panel = document.getElementById('music-panel');
+  const button = document.getElementById('music-panel-button');
+  const closeBtn = document.getElementById('close-btn');
+  const audioPlayer = document.getElementById('audio-player');
+  const songItems = document.querySelectorAll('.song-item');
+
+  // Open panel
+  button.addEventListener('click', () => {
+    panel.style.width = '320px';
+    button.style.transform = 'translateY(-50%) scale(1.1)';
+  });
+
+  // Close panel
+  closeBtn.addEventListener('click', () => {
+    panel.style.width = '0';
+    button.style.transform = 'translateY(-50%) scale(1)';
+  });
+
+  // Play selected song
+  songItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const src = item.getAttribute('data-src');
+      audioPlayer.src = src;
+      audioPlayer.play();
+
+      // Highlight active song
+      songItems.forEach(i => {
+        i.style.background = '';
+        i.querySelector('div').textContent = '▶';
+      });
+      item.style.background = '#e0f7e9';
+      item.querySelector('div').textContent = '⏸'; // Show pause icon for active song
+    });
+
+    // Hover effect
+    item.addEventListener('mouseenter', () => {
+      if (!item.style.background) item.style.background = '#f0f0f0';
+    });
+    item.addEventListener('mouseleave', () => {
+      if (!item.style.background.includes('e0f7e9')) item.style.background = '';
+    });
+  });
+</script>
